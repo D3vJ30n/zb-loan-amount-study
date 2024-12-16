@@ -6,6 +6,7 @@ import com.example.demo.domain.dto.response.TransactionResponse;
 import com.example.demo.domain.transaction.TransactionType;
 import com.example.demo.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,16 +27,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class TransactionControllerTest {
+class TransactionControllerUnitTest { // 클래스명 변경
 
     @Mock
-    private TransactionService transactionService; // Mock 객체 생성
+    private TransactionService transactionService;
 
     @InjectMocks
-    private TransactionController transactionController; // Mock 객체 주입
+    private TransactionController transactionController;
 
-    private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build();
+    private MockMvc mockMvc; // MockMvc 선언
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build(); // 초기화
+    }
 
     @Test
     @DisplayName("잔액 사용 성공")
@@ -96,7 +102,7 @@ class TransactionControllerTest {
                 .build());
 
         // when & then
-        mockMvc.perform(get("/api/v1/transactions/transactionId"))
+        mockMvc.perform(get("/api/v1/transactions/{transactionId}", "transactionIdValue"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accountNumber").value("1000000000"))
             .andExpect(jsonPath("$.transactionType").value("USE"))

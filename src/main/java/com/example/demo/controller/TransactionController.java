@@ -33,7 +33,7 @@ public class TransactionController {
 
     @GetMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> queryTransaction(
-        @PathVariable String transactionId) {
+        @PathVariable("transactionId") String transactionId) { // 명시적으로 이름 지정
         return ResponseEntity.ok(
             transactionService.queryTransaction(transactionId)
         );

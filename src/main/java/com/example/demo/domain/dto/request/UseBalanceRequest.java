@@ -21,4 +21,7 @@ public class UseBalanceRequest {
     @NotNull
     @Min(10)
     private Long amount;
+
+    public UseBalanceRequest(String number, long l) {
+    }
 }

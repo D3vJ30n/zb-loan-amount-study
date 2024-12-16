@@ -70,9 +70,12 @@ public class AccountService {
             throw new AccountException(ErrorCode.BALANCE_NOT_EMPTY);
         }
 
-        account.unregister();
+        account.unregister(); // 상태 변경
+        accountRepository.save(account); // @Transactional이 설정된 메서드에서는 엔티티의 상태 변화가 자동으로 감지. 하지만 Mock 객체를 사용한 테스트에서는 이를 모의(Mock)하기 때문에 save()가 호출되지 않은 것으로 인식됨. 따라서 명시적으로 save()를 호출하여 엔티티의 상태 변화를 저장해야 함.
+
         return AccountResponse.from(account);
     }
+
 
     @Transactional(readOnly = true)
     public List<AccountResponse> getAccountsByUserId(Long userId) {

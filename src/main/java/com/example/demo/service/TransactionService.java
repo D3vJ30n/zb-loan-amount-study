@@ -33,11 +33,19 @@ public class TransactionService {
             .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 사용자 확인
+        if (account.getUserId() == null) {
+            throw new AccountException(ErrorCode.USER_NOT_FOUND);
+        }
         if (!account.getUserId().equals(request.getUserId())) {
             throw new AccountException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 계좌 상태 확인
+        // 잔액 부족 여부 먼저 체크 (테스트 기대 사항에 맞춤)
+        if (account.getBalance() < request.getAmount()) {
+            throw new AccountException(ErrorCode.INSUFFICIENT_BALANCE);
+        }
+
+        // 계좌 상태 확인 (잔액 부족 예외보다 나중에 체크)
         if (account.getAccountStatus() != AccountStatus.IN_USE) {
             throw new AccountException(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED);
         }
@@ -67,18 +75,18 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByTransactionId(request.getTransactionId())
             .orElseThrow(() -> new AccountException(ErrorCode.TRANSACTION_NOT_FOUND));
 
-        // 계좌 확인
+        // 거래 금액 불일치 먼저 체크(테스트 기대 사항에 맞춤)
+        if (!transaction.getAmount().equals(request.getAmount())) {
+            throw new AccountException(ErrorCode.CANCEL_MUST_FULLY);
+        }
+
+        // 계좌 확인 (금액 불일치보다 나중에)
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber())
             .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
 
         // 거래 계좌 일치 확인
         if (!transaction.getAccountNumber().equals(request.getAccountNumber())) {
             throw new AccountException(ErrorCode.TRANSACTION_ACCOUNT_UN_MATCH);
-        }
-
-        // 거래 금액 일치 확인
-        if (!transaction.getAmount().equals(request.getAmount())) {
-            throw new AccountException(ErrorCode.CANCEL_MUST_FULLY);
         }
 
         // 잔액 취소

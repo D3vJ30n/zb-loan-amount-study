@@ -15,8 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -33,32 +31,19 @@ class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
-    @Mock
-    private RedisTestService redisTestService;
-
-    @Mock
-    private RedissonClient redissonClient;
-
-    @Mock
-    private RLock rLock;
-
     @InjectMocks
     private AccountService accountService;
 
     @BeforeEach
     void setup() {
-        // RedissonClient와 RLock Mock 설정
-        when(redissonClient.getLock(anyString())).thenReturn(rLock);
-        doNothing().when(rLock).lock();
-        doNothing().when(rLock).unlock();
+        lenient().when(accountRepository.findByUserId(any()))
+            .thenReturn(Arrays.asList());
     }
 
     @Test
     @DisplayName("계좌 생성 성공")
     void createAccountSuccess() {
         // given
-        given(accountRepository.findByUserId(any()))
-            .willReturn(Arrays.asList());
         given(accountRepository.save(any()))
             .willReturn(Account.builder()
                 .accountNumber("1000000000")
@@ -83,15 +68,9 @@ class AccountServiceTest {
         // given
         given(accountRepository.findByUserId(any()))
             .willReturn(Arrays.asList(
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
-                Account.builder().build(),
+                Account.builder().build(), Account.builder().build(), Account.builder().build(),
+                Account.builder().build(), Account.builder().build(), Account.builder().build(),
+                Account.builder().build(), Account.builder().build(), Account.builder().build(),
                 Account.builder().build()
             ));
 
@@ -141,3 +120,4 @@ class AccountServiceTest {
         assertEquals(ErrorCode.BALANCE_NOT_EMPTY, exception.getErrorCode());
     }
 }
+

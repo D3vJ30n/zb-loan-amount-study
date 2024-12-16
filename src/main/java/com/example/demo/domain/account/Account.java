@@ -1,5 +1,7 @@
 package com.example.demo.domain.account;
 
+import com.example.demo.domain.exception.AccountException;
+import com.example.demo.domain.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -30,11 +32,12 @@ public class Account {
     private LocalDateTime unregisteredAt;
 
     public void useBalance(Long amount) {
-        if (amount > balance) {
-            throw new IllegalArgumentException("잔액이 부족합니다.");
+        if (amount > this.balance) {
+            throw new AccountException(ErrorCode.BALANCE_NOT_EMPTY);
         }
-        balance -= amount;
+        this.balance -= amount;
     }
+
 
     public void cancelBalance(Long amount) {
         balance += amount;
