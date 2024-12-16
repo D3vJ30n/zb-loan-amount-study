@@ -1,19 +1,27 @@
 spring:
+  profiles:
+    active: h2  # 기본 프로파일 설정: H2
   data:
     redis:
-      host: 127.0.0.1
+      host: localhost
       port: 6379
+
+# H2 프로파일 설정
+---
+spring:
+  config:
+    activate:
+      on-profile: h2
   datasource:
     url: jdbc:h2:mem:test
     username: sa
     password:
-    driverClassName: org.h2.Driver
+    driver-class-name: org.h2.Driver
   h2:
     console:
       enabled: true
   jpa:
     defer-datasource-initialization: true
-    database-platform: H2
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
@@ -21,3 +29,22 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+
+# MySQL 프로파일 설정
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:mysql://192.168.219.101:3306/zbproject01?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 6188
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

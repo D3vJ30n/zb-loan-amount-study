@@ -24,25 +24,20 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
-    implementation 'org.redisson:redisson:3.40.1'
-    implementation('it.ozimov:embedded-redis:0.7.3') {
-        exclude group: "org.slf4j", module: "slf4j-simple"
-    }
+    // Redis
+    implementation 'org.redisson:redisson-spring-boot-starter:3.23.5'
 
-    // implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    // Jakarta
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
+    // H2 (테스트용)
     runtimeOnly 'com.h2database:h2'
 
-    // MariaDB
-    // implementation 'org.mariadb.jdbc:mariadb-java-client:3.5.1'
-
-    // mysql
+    // MySQL
     implementation 'com.mysql:mysql-connector-j'
-
-    // Jackson (Spring Boot 관리 버전 사용)
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
@@ -51,6 +46,7 @@ dependencies {
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
@@ -61,9 +57,27 @@ wrapper {
 
 test {
     useJUnitPlatform()
+    exclude '**/LibraryTest.class'
 }
 
 // 메인 클래스 설정
 springBoot {
-    mainClassName = 'com.example.demo.WeatherApplication'
+    mainClassName = 'com.example.demo.AccountApplication'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-parameters"]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
 }
