@@ -23,6 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
     implementation 'org.redisson:redisson:3.40.1'
     implementation('it.ozimov:embedded-redis:0.7.3') {
@@ -64,5 +65,5 @@ test {
 
 // 메인 클래스 설정
 springBoot {
-    mainClassName = 'com.example.demo.DemoApplication'
+    mainClassName = 'com.example.demo.WeatherApplication'
 }

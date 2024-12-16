@@ -31,20 +31,22 @@ public class LibraryTest {
     }
 
     @Test
-    void mariadbTest() {
+    void mysqlTest() {
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
+            // MySQL Driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
-                "jdbc:mariadb://192.168.219.101:3306/testdb1",
+                "jdbc:mysql://192.168.219.101:3306/zbproject01?useSSL=false&serverTimezone=Asia/Seoul",
                 "root",
-                "Jdm4568396*"
+                "6188"
             );
-            assertNotNull(conn);
+            assertNotNull(conn, "Connection should not be null");
             conn.close();
         } catch (Exception e) {
-            fail("MariaDB Fail: " + e.getMessage());
+            fail("MySQL Connection Fail: " + e.getMessage());
         }
     }
+
 
     @Test
     void lombokTest() {
