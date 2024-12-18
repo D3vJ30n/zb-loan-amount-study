@@ -5,7 +5,7 @@ import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import redis.embedded.RedisServer; // 이 import가 유효해야 합니다.
+import redis.embedded.RedisServer;
 
 import java.io.IOException;
 

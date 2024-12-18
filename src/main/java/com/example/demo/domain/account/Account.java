@@ -38,7 +38,6 @@ public class Account {
         this.balance -= amount;
     }
 
-
     public void cancelBalance(Long amount) {
         balance += amount;
     }

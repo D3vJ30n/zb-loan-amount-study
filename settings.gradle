@@ -1,2 +1,2 @@
-rootProject.name = 'zb-weather-project'
+rootProject.name = 'zb-account-project'
 include ':main', ':test'
