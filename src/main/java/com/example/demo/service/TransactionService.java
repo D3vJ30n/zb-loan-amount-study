@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * 거래 관리 서비스
+ */
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -26,6 +29,12 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final RedisTestService redisTestService;
 
+    /**
+     * 잔액 사용
+     * @param request 잔액 사용 요청 정보
+     * @return 거래 결과 정보
+     * @throws AccountException 거래 실패 시
+     */
     @Transactional
     public TransactionResponse useBalance(UseBalanceRequest request) {
         // 계좌 확인
@@ -69,6 +78,12 @@ public class TransactionService {
         return TransactionResponse.from(transaction);
     }
 
+    /**
+     * 잔액 사용 취소
+     * @param request 잔액 사용 취소 요청 정보
+     * @return 거래 취소 결과 정보
+     * @throws AccountException 거래 취소 실패 시
+     */
     @Transactional
     public TransactionResponse cancelBalance(CancelBalanceRequest request) {
         // 거래 확인
@@ -108,6 +123,12 @@ public class TransactionService {
         return TransactionResponse.from(cancelTransaction);
     }
 
+    /**
+     * 거래 조회
+     * @param transactionId 거래 ID
+     * @return 거래 정보
+     * @throws AccountException 거래 조회 실패 시
+     */
     @Transactional(readOnly = true)
     public TransactionResponse queryTransaction(String transactionId) {
         return TransactionResponse.from(

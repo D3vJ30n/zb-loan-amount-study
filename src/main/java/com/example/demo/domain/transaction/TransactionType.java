@@ -1,6 +1,16 @@
 package com.example.demo.domain.transaction;
 
+/**
+ * 거래 유형 열거형
+ */
 public enum TransactionType {
-    USE,    // 잔액 사용
-    CANCEL  // 잔액 사용 취소
+    /**
+     * 잔액 사용
+     */
+    USE,
+
+    /**
+     * 잔액 사용 취소
+     */
+    CANCEL
 }

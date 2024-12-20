@@ -7,11 +7,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Redis를 활용한 분산 락 서비스
+ */
 @Service
 @RequiredArgsConstructor
 public class RedisTestService {
     private final RedissonClient redissonClient;
 
+    /**
+     * 계좌에 대한 락 획득
+     * @param accountNumber 계좌번호
+     * @throws RuntimeException 락 획득 실패 시
+     */
     public void lock(String accountNumber) {
         RLock lock = redissonClient.getLock(getLockKey(accountNumber));
         try {
@@ -24,6 +32,10 @@ public class RedisTestService {
         }
     }
 
+    /**
+     * 계좌에 대한 락 해제
+     * @param accountNumber 계좌번호
+     */
     public void unlock(String accountNumber) {
         RLock lock = redissonClient.getLock(getLockKey(accountNumber));
         try {
@@ -33,6 +45,11 @@ public class RedisTestService {
         }
     }
 
+    /**
+     * 락 키 생성
+     * @param accountNumber 계좌번호
+     * @return 락 키
+     */
     private String getLockKey(String accountNumber) {
         return "ACLK:" + accountNumber;
     }

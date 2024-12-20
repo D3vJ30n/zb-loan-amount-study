@@ -7,10 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * 전역 예외 처리 핸들러
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    /**
+     * AccountException 처리
+     * @param e 발생한 AccountException
+     * @return 에러 응답
+     */
     @ExceptionHandler(AccountException.class)
     public ResponseEntity<ErrorResponse> handleAccountException(AccountException e) {
         log.error("{} is occurred.", e.getErrorCode());
@@ -20,6 +27,11 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(e.getErrorCode(), e.getErrorMessage()));
     }
 
+    /**
+     * 기타 예외 처리
+     * @param e 발생한 Exception
+     * @return 에러 응답
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Exception is occurred.", e);

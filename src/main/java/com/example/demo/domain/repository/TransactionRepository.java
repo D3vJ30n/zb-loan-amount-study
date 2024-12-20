@@ -6,7 +6,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * 거래 정보 레포지토리
+ */
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    /**
+     * 거래 ID로 거래 정보 조회
+     * @param transactionId 거래 ID
+     * @return 거래 정보
+     */
     Optional<Transaction> findByTransactionId(String transactionId);
 }

@@ -14,6 +14,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+// 의존성 관리
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
@@ -31,6 +32,12 @@ dependencies {
     // Redis
     implementation 'org.redisson:redisson-spring-boot-starter:3.23.5'
     implementation 'com.github.kstyrc:embedded-redis:0.6'
+
+    // 로깅
+    implementation 'org.slf4j:slf4j-api'
+
+    // 테스트용 임베디드 Redis
+    testImplementation 'it.ozimov:embedded-redis:0.7.3'
 
     // Jakarta
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
@@ -52,11 +59,18 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
+// 오류 방지용
+configurations.all {
+    exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+// 래퍼 설정
 wrapper {
     gradleVersion = '8.11.1'
     distributionType = Wrapper.DistributionType.BIN
 }
 
+// 테스트 설정
 test {
     useJUnitPlatform()
     exclude '**/LibraryTest.class'
@@ -67,10 +81,12 @@ springBoot {
     mainClassName = 'com.example.demo.AccountApplication'
 }
 
+// 컴파일 설정
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ["-parameters"]
 }
 
+// 소스 디렉토리 설정
 sourceSets {
     main {
         java {

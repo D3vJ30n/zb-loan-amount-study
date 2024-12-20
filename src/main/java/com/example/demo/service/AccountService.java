@@ -17,12 +17,21 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * 계좌 관리 서비스
+ */
 @Service
 @RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
     private final RedisTestService redisTestService;
 
+    /**
+     * 계좌 생성
+     * @param request 계좌 생성 요청 정보
+     * @return 생성된 계좌 정보
+     * @throws AccountException 계좌 생성 실패 시
+     */
     @Transactional
     public AccountResponse createAccount(CreateAccountRequest request) {
         // 계좌 수 확인
@@ -50,6 +59,12 @@ public class AccountService {
         return AccountResponse.from(account);
     }
 
+    /**
+     * 계좌 해지
+     * @param request 계좌 해지 요청 정보
+     * @return 해지된 계좌 정보
+     * @throws AccountException 계좌 해지 실패 시
+     */
     @Transactional
     public AccountResponse deleteAccount(DeleteAccountRequest request) {
         Account account = accountRepository.findByAccountNumber(request.getAccountNumber())
@@ -77,6 +92,11 @@ public class AccountService {
     }
 
 
+    /**
+     * 사용자의 계좌 목록 조회
+     * @param userId 사용자 ID
+     * @return 계좌 목록
+     */
     @Transactional(readOnly = true)
     public List<AccountResponse> getAccountsByUserId(Long userId) {
         return accountRepository.findByUserId(userId).stream()
