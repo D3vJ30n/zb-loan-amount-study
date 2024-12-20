@@ -1,4 +1,4 @@
-```markdown
+
 # ZB Account Project
 
 ## 1. 프로젝트 개요
@@ -15,57 +15,12 @@ Redis를 활용한 동시성 제어와 트랜잭션 관리가 구현되어 있�
 - Redis (Redisson)  
 - JUnit 5  
 - Mockito  
-- Gradle 8.11.1  
+- Gradle 8.11.1
 
 ---
 
 ## 3. 프로젝트 구조
-```plaintext
-src
-├── main
-│   ├── java/com/example/demo
-│   │   ├── controller
-│   │   │   ├── AccountController
-│   │   │   └── TransactionController
-│   │   ├── domain
-│   │   │   ├── account
-│   │   │   │   ├── Account
-│   │   │   │   └── AccountStatus
-│   │   │   ├── dto
-│   │   │   │   ├── request
-│   │   │   │   │   ├── CancelBalanceRequest
-│   │   │   │   │   ├── CreateAccountRequest
-│   │   │   │   │   ├── DeleteAccountRequest
-│   │   │   │   │   └── UseBalanceRequest
-│   │   │   │   └── response
-│   │   │   │       ├── AccountResponse
-│   │   │   │       ├── ErrorResponse
-│   │   │   │       └── TransactionResponse
-│   │   │   ├── exception
-│   │   │   │   ├── AccountException
-│   │   │   │   ├── ErrorCode
-│   │   │   │   └── GlobalExceptionHandler
-│   │   │   ├── repository
-│   │   │   │   ├── AccountRepository
-│   │   │   │   └── TransactionRepository
-│   │   │   └── transaction
-│   │   │       ├── Transaction
-│   │   │       ├── TransactionResultType
-│   │   │       └── TransactionType
-│   │   └── service
-│   │       ├── AccountService
-│   │       ├── RedisTestService
-│   │       └── TransactionService
-│   └── resources
-└── test
-    └── java/com/example/demo
-        ├── controller
-        │   ├── AccountControllerTest
-        │   └── TransactionControllerUnitTest
-        └── service
-            ├── AccountServiceTest
-            └── TransactionServiceTest
-```
+![directory.png](img/directory.png)
 
 ---
 
