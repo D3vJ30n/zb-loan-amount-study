@@ -29,7 +29,7 @@ public class CompanyController {
 
     @PostMapping
     public ResponseEntity<CompanyDTO> addCompany(@RequestBody CompanyDTO request) {
-        var result = companyService.save(request);
+        var result = companyService.save(String.valueOf(request));
         return ResponseEntity.ok(result);
     }
 
