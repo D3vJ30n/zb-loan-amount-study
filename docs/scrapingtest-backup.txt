@@ -1,0 +1,82 @@
+package com.example.demo;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@SpringBootApplication
+public class DividendApplication {
+
+    public static void main(String[] args) {
+        // Spring 애플리케이션 실행 대신 배당금 스크래핑 테스트 실행
+        scrapeDividendInfo("COKE");
+    }
+
+    public static void scrapeDividendInfo(String ticker) {
+        try {
+            // Yahoo Finance URL - 월별 데이터로 설정
+            // Yahoo Finance의 Chart API를 사용하여 주식 데이터 요청
+            // interval=1d: 일별 데이터를 가져와 정확한 배당금 지급일 파악
+            // range=5y: 5년간의 배당금 히스토리 데이터 수집
+            // events=div: 배당금 관련 이벤트만 필터링하여 요청
+            String url = "https://query1.finance.yahoo.com/v8/finance/chart/" + ticker
+                + "?interval=1d&range=5y&events=div";
+
+            // Jsoup 라이브러리를 사용하여 HTTP 요청 수행
+            // ignoreContentType(true): JSON 응답을 허용하기 위해 컨텐츠 타입 검사 비활성화
+            // userAgent: 웹 브라우저처럼 동작하도록 설정하여 차단 방지
+            // get(): HTTP GET 요청 실행하여 응답 받기
+            Document document = Jsoup.connect(url)
+                .ignoreContentType(true)
+                .userAgent("Mozilla/5.0")
+                .get();
+
+            // Jackson 라이브러리의 ObjectMapper를 사용하여 JSON 파싱
+            ObjectMapper mapper = new ObjectMapper();
+            // JSON 문자열을 JsonNode 트리 구조로 변환
+            JsonNode rootNode = mapper.readTree(document.text());
+            // JSON 구조를 따라 배당금 데이터가 있는 노드로 이동
+            // path(): 안전하게 노드 탐색 (null 대신 MissingNode 반환)
+            JsonNode events = rootNode.path("chart").path("result").get(0).path("events").path("dividends");
+
+            // 검색한 주식 종목의 배당금 정보 출력 시작
+            System.out.println(ticker + "의 배당금 정보:");
+
+            // 배당금 데이터 존재 여부 확인
+            if (events.isEmpty()) {
+                System.out.println("배당금 데이터가 없습니다.");
+            } else {
+                // 배당금 데이터를 순회하면서 처리
+                // fields(): JsonNode의 모든 필드를 Iterator로 반환
+                events.fields().forEachRemaining(entry -> {
+                    JsonNode dividend = entry.getValue();
+                    // Unix timestamp 형식의 날짜를 가져옴
+                    long timestamp = dividend.path("date").asLong();
+                    // 배당금 금액 추출
+                    double amount = dividend.path("amount").asDouble();
+
+                    // Unix timestamp를 사람이 읽기 쉬운 날짜 형식으로 변환
+                    // timestamp * 1000: 초 단위를 밀리초 단위로 변환
+                    Date date = new Date(timestamp * 1000);
+                    // 날짜 포맷 지정 (yyyy-MM-dd 형식)
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    String formattedDate = sdf.format(date);
+
+                    // 날짜와 배당금 정보를 포맷팅하여 출력
+                    // printf를 사용하여 소수점 둘째자리까지 표시
+                    System.out.printf("날짜: %s, 배당금: $%.2f%n", formattedDate, amount);
+                });
+            }
+
+        } catch (Exception e) {
+            // 에러 발생 시 메시지와 스택 트레이스 출력
+            System.out.println("배당금 데이터 스크래핑 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}

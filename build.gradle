@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'war'
     id 'application'
-    id 'org.springframework.boot' version '3.4.0'
+    id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -27,7 +27,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.2.8'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+    implementation 'org.jsoup:jsoup:1.18.1'
+
+    // RestTemplate 사용을 위한 Apache HttpComponents 추가
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
 
     // Redis
     implementation 'org.redisson:redisson-spring-boot-starter:3.23.5'
@@ -49,6 +54,9 @@ dependencies {
     implementation 'com.mysql:mysql-connector-j'
 
     // Lombok
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.json:json:20230227'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
@@ -59,8 +67,10 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.5.0'
 }
 
-// 오류 방지용
 configurations.all {
+    resolutionStrategy {
+        force 'org.slf4j:slf4j-api:1.7.36'
+    }
     exclude group: 'org.slf4j', module: 'slf4j-simple'
 }
 
@@ -70,18 +80,11 @@ wrapper {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-// 테스트 설정
-test {
-    useJUnitPlatform()
-    exclude '**/LibraryTest.class'
-}
-
 // 메인 클래스 설정
 springBoot {
-    mainClassName = 'com.example.demo.AccountApplication'
+    mainClassName = 'com.example.demo.DividendApplication'
 }
 
-// 컴파일 설정
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ["-parameters"]
 }
