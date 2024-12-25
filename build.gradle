@@ -27,9 +27,20 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-security:3.2.8'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.2.8' // 테스트 할 때 주석 처리 해야함, 401 에러 발생
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     implementation 'org.jsoup:jsoup:1.18.1'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    implementation 'org.seleniumhq.selenium:selenium-java:4.14.0'
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.14.0'
+
+    // Apache Commons Collections
+    implementation 'org.apache.commons:commons-collections4:4.4'
 
     // RestTemplate 사용을 위한 Apache HttpComponents 추가
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
@@ -54,11 +65,8 @@ dependencies {
     implementation 'com.mysql:mysql-connector-j'
 
     // Lombok
-    implementation 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.json:json:20230227'
-    compileOnly 'org.projectlombok:lombok:1.18.30'
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    implementation 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
 
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -82,7 +90,7 @@ wrapper {
 
 // 메인 클래스 설정
 springBoot {
-    mainClassName = 'com.example.demo.DividendApplication'
+    mainClassName = 'com.example.demo.Application'
 }
 
 tasks.withType(JavaCompile).configureEach {

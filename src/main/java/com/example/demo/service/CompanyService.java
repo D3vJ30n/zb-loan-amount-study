@@ -1,83 +1,105 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.CompanyDTO;
-import com.example.demo.entity.CompanyEntity;
-import com.example.demo.entity.DividendEntity;
+import com.example.demo.exception.impl.NoCompanyException;
+import com.example.demo.model.Company;
 import com.example.demo.model.ScrapedResult;
-import com.example.demo.repository.CompanyRepository;
-import com.example.demo.repository.DividendRepository;
-import com.example.demo.scraper.YahooFinanceScraper;
+import com.example.demo.persist.CompanyRepository;
+import com.example.demo.persist.DividendRepository;
+import com.example.demo.persist.entity.CompanyEntity;
+import com.example.demo.persist.entity.DividendEntity;
+import com.example.demo.scraper.Scraper;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.Trie;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class CompanyService {
 
+    private final Trie trie;
+    private final Scraper yahooFinanceScraper;
     private final CompanyRepository companyRepository;
     private final DividendRepository dividendRepository;
-    private final YahooFinanceScraper yahooFinanceScraper;
 
-    @Transactional
-    public CompanyDTO save(String ticker) {
-        // 회사 존재 여부 확인
-        boolean exists = companyRepository.existsByTicker(ticker);
+    public Company save(String ticker) {
+        boolean exists = this.companyRepository.existsByTicker(ticker);
         if (exists) {
-            throw new RuntimeException("이미 존재하는 회사입니다.");
+            throw new RuntimeException("already exists ticker -> " + ticker);
+        }
+        return this.storeCompanyAndDividend(ticker);
+    }
+
+    public Page<CompanyEntity> getAllCompany(Pageable pageable) {
+        return this.companyRepository.findAll(pageable);
+    }
+
+    private Company storeCompanyAndDividend(String ticker) {
+        // 1. ticker를 기준으로 회사를 스크래핑
+        Company company = this.yahooFinanceScraper.scrapCompanyByTicker(ticker);
+        if (ObjectUtils.isEmpty(company)) {
+            throw new RuntimeException("failed to scrap ticker -> " + ticker);
         }
 
-        // 야후 파이낸스에서 회사의 정보를 스크래핑
-        ScrapedResult scrapedResult = yahooFinanceScraper.scrap(ticker);
-        
-        // 회사 정보 저장
-        CompanyEntity company = companyRepository.save(
-            CompanyEntity.builder()
-                .ticker(scrapedResult.getCompany().getTicker())
-                .name(scrapedResult.getCompany().getName())
-                .build()
-        );
+        // 2. 해당 회사가 존재할 경우, 회사의 배당금 정보를 스크래핑
+        ScrapedResult scrapedResult = this.yahooFinanceScraper.scrap(company);
 
-        // 배당금 정보 저장
+        // 3. 스크래핑 결과 반환
+        CompanyEntity companyEntity = this.companyRepository.save(new CompanyEntity(company));
         List<DividendEntity> dividendEntities = scrapedResult.getDividends().stream()
-                .map(dividend -> DividendEntity.builder()
-                        .company(company)
-                        .date(dividend.getDate())
-                        .dividend(dividend.getDividend())
-                        .build())
+                .map(e -> new DividendEntity(companyEntity.getId(), e))
                 .collect(Collectors.toList());
-        dividendRepository.saveAll(dividendEntities);
+        this.dividendRepository.saveAll(dividendEntities);
 
-        return new CompanyDTO(company);
+        return company;
     }
 
-    public List<CompanyDTO> getCompanyNamesByKeyword(String keyword) {
-        // 키워드로 회사 검색 구현
-        return companyRepository.findAll().stream()
-            .filter(company -> company.getName().contains(keyword))
-            .map(CompanyDTO::new)
-            .collect(Collectors.toList());
+    public List<String> getCompanyNamesByKeyword(String keyword) {
+        Pageable limit = PageRequest.of(0, 10);
+        Page<CompanyEntity> companyEntities = this.companyRepository.findByNameStartingWithIgnoreCase(keyword, limit);
+        return companyEntities.getContent()
+                .stream()
+                .map(e -> e.getName())
+                .collect(Collectors.toList());
     }
 
-    public CompanyDTO getCompanyByTicker(String ticker) {
-        CompanyEntity company = companyRepository.findByTicker(ticker);
-        if (company == null) {
-            throw new RuntimeException("존재하지 않는 회사입니다.");
-        }
-        return new CompanyDTO(company);
+    public void addAutocompleteKeyword(String keyword) {
+        this.trie.put(keyword, null);
     }
 
-    @Transactional
+    public List<String> autocomplete(String keyword) {
+        return (List<String>) this.trie.prefixMap(keyword).keySet()
+                .stream()
+                .limit(10)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteAutocompleteKeyword(String keyword) {
+        this.trie.remove(keyword);
+    }
+
+    @CacheEvict(value = "finance", key = "#ticker")
     public String deleteCompany(String ticker) {
-        CompanyEntity company = companyRepository.findByTicker(ticker);
-        if (company != null) {
-            dividendRepository.deleteAllByCompanyId(company.getId());
-            companyRepository.delete(company);
-            return "회사 정보가 삭제되었습니다.";
-        }
-        return "회사를 찾을 수 없습니다.";
+        CompanyEntity company = this.companyRepository.findByTicker(ticker)
+                .orElseThrow(() -> new NoCompanyException());
+
+        // 1. 배당금 정보 삭제
+        this.dividendRepository.deleteAllByCompanyId(company.getId());
+        // 2. 회사 정보 삭제
+        this.companyRepository.delete(company);
+
+        // 3. 자동완성 키워드 삭제
+        this.deleteAutocompleteKeyword(company.getName());
+
+        return company.getName();
     }
 }
